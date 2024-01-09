@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  api-dev:
+    build: ./api
+    image: sdpx/api
+    ports:
+      - "8081:5000"
+    depends_on:
+      - db-dev
+    environment:
+      FLASK_ENV: development
+      DATABASE_URL: mysql+mysqlconnector://root:root@db-dev:3306/users
+      HOST: db-dev
+
+  db-dev:
+    image: mysql
+    ports:
+      - "32000:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/db:/var/lib/mysql  # Mount a volume for MySQL data persistence
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: users
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 'db4dev$'
+  api-test:
+    build: ./api
+    image: sdpx/api
+    ports:
+      - "8082:5000"
+    depends_on:
+      - db-test
+    environment:
+      FLASK_ENV: development
+      DATABASE_URL: mysql+mysqlconnector://root:root@db-test:3306/users
+      HOST: db-test
+
+  db-test:
+    image: mysql
+    ports:
+      - "32001:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/dbtest:/var/lib/mysql  # Mount a volume for MySQL data persistence
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: users
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 'db4test$'
+      
